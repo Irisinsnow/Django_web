@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %}天天生鲜-登录{% endblock title %}
+{% block topfiles %}
+    <script src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
+    <script>
+    $(function () {
+        // 绑定btnLogin的click事件
+        $('#btnLogin').click(function () {
+            // 1.获取用户输入的用户名和密码
+            username = $('#username').val()
+            password = $('#pwd').val()
+            csrf = $('input[name="csrfmiddlewaretoken"]').val()
+            remember = $('input[name="remember"]').is(':checked')
+            //alert(remember)
+            // 2.发起一个ajax请求 post
+            params = {'username':username, 'password':password,
+                'csrfmiddlewaretoken':csrf, 'remember':remember}
+            $.post('/user/login_check/',params, function (data) {
+                // 进行处理
+                if (data.res == 0){
+                    // 用户名或密码错误
+                    $('.user_error').text('用户名或密码错误').show()
+                }
+                else
+                {
+                    // 登录成功
+                    // alert(data.next)
+                    location.href = data.next  //跳转到首页
+                }
+            })
+
+        })
+    })
+    </script>
+{% endblock topfiles %}
+{% block header_con %}{% endblock header_con %}
+{% block search_bar %}{% endblock search_bar %}
+{% block body %}
+	<div class="login_top clearfix">
+		<a href="index.html" class="login_logo"><img src="{% static 'images/logo02.png' %}"></a>
+	</div>
+
+	<div class="login_form_bg">
+		<div class="login_form_wrap clearfix">
+			<div class="login_banner fl"></div>
+			<div class="slogan fl">日夜兼程 · 急速送达</div>
+			<div class="login_form fr">
+				<div class="login_title clearfix">
+					<h1>用户登录</h1>
+					<a href="#">立即注册</a>
+				</div>
+				<div class="form_input">
+{#					<form>#}
+                        {% csrf_token %}
+						<input type="text" id="username" class="name_input" value="{{ username }}" placeholder="请输入用户名">
+						<div class="user_error">输入错误</div>
+						<input type="password" id="pwd" class="pass_input" placeholder="请输入密码">
+						<div class="pwd_error">输入错误</div>
+						<div class="more_input clearfix">
+							<input type="checkbox" name="remember">
+							<label>记住用户名</label>
+							<a href="#">忘记密码</a>
+						</div>
+						<input type="button" id="btnLogin" value="登录" class="input_submit">
+{#					</form>#}
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock body %}
