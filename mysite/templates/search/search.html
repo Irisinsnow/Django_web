@@ -1,0 +1,67 @@
+{% extends 'base_detail_list.html' %}
+{% load staticfiles %}
+{% block title %}天天生鲜-商品搜索结果列表{% endblock title %}
+{% block topfiles %}
+    <script src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
+    <script>
+    $(function () {
+        goods_id_list = ''
+        $('.goods_type_list').children('li').each(function () {
+            // 1.获取当前li的属性goods_id
+            goods_id = $(this).attr('goods_id')
+            goods_id_list += goods_id + ','
+        })
+        //alert(goods_id_list) 1,2,3,
+        goods_id_list = goods_id_list.substr(0, goods_id_list.length-1)
+        // 发起一个ajax请求，获取商品的图片数据
+        $.get('/get_image_list/?goods_id_list='+goods_id_list, function (data) {
+            // {'商品id':'商品图片路径'} data.img_dict
+            img_dict = data.img_dict
+            $('.goods_type_list').children('li').each(function () {
+                // 1.获取当前li的属性goods_id
+                goods_id = $(this).attr('goods_id')
+                // 2.设置当前li下面的img标签的src属性
+                $(this).find('img').prop('src', '/static/'+img_dict[goods_id])
+            })
+        })
+    })
+    </script>
+{% endblock topfiles %}
+{% block main_content %}
+	<div class="breadcrumb">
+		<a href="#">{{ query }}</a>
+		<span>></span>
+		<a href="#">搜索结果</a>
+	</div>
+	<div class="main_wrap clearfix">
+			<ul class="goods_type_list clearfix">
+                {% for item in page %}
+				<li goods_id="{{ item.object.id }}">
+					<a href="/goods/{{ item.object.id }}/"><img src="{% static goods.img_url %}"></a>
+					<h4><a href="/goods/{{ item.object.id }}/">{{ item.object.goods_name }}</a></h4>
+					<div class="operate">
+						<span class="prize">￥{{ item.object.goods_price }}</span>
+						<span class="unit">{{ item.object.goods_price }}/{{ item.object.goods_unite }}</span>
+						<a href="#" class="add_goods" title="加入购物车"></a>
+					</div>
+				</li>
+                {% endfor %}
+			</ul>
+
+			<div class="pagenation">
+                {% if page.has_previous %}
+				    <a href="/search/?q={{ query }}&page={{ page.number|add:-1 }}">&lt;上一页</a>
+                {% endif %}
+                {% for pindex in paginator.page_range %}
+                    {% if pindex == page.number  %}
+				        <a href="/search/?q={{ query }}&page={{ pindex }}" class="active">{{ pindex }}</a>
+                    {% else %}
+                        <a href="/search/?q={{ query }}&page={{ pindex }}">{{ pindex }}</a>
+                    {% endif %}
+                {% endfor %}
+                {% if page.has_next %}
+				    <a href="/search/?q={{ query }}&page={{ page.number|add:1 }}">下一页&gt;</a>
+                {% endif %}
+			</div>
+	</div>
+{% endblock main_content %}

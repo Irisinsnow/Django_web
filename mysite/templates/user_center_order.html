@@ -1,0 +1,70 @@
+{% extends 'base_user_center.html' %}
+{% load staticfiles %}
+{% load filters %}
+{% block topfiles %}
+    <script src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
+    <script>
+    $(function () {
+        $('table.order_list_table').each(function () {
+            $(this).find('ul.order_goods_list').each(function () {
+                // 1.获取商品价格
+                goods_price = $(this).find('em').text()
+                goods_price = parseFloat(goods_price)
+                // 2.获取商品的数目
+                goods_count = $(this).children('li.col03').text()
+                goods_count = parseInt(goods_count)
+                // 3.计算商品小计并设置
+                total_price = goods_price*goods_count
+                $(this).children('li.col04').text(total_price.toFixed(2))
+            })
+        })
+    })
+    </script>
+{% endblock topfiles %}
+{% block right_content %}
+		<div class="right_content clearfix">
+				<h3 class="common_title2">全部订单</h3>
+                {% for order_basic in order_basic_list %}
+				<ul class="order_list_th w978 clearfix">
+					<li class="col01">{{ order_basic.create_time|date:'Y-m-d H:i:s' }}</li>
+					<li class="col02">订单号：{{ order_basic.order_id }}</li>
+					<li class="col02 stress">{{ order_basic.order_status|order_status }}</li>
+				</ul>
+
+				<table class="order_list_table w980">
+					<tbody>
+						<tr>
+							<td width="55%">
+                                {% for order_detail in order_basic.order_detail_list %}
+								<ul class="order_goods_list clearfix">					
+									<li class="col01"><img src="{% static order_detail.goods.img_url %}"></li>
+									<li class="col02">{{ order_detail.goods.goods_name }}<em>{{ order_detail.goods.goods_price }}/{{ order_detail.goods.goods_unite }}</em></li>
+									<li class="col03">{{ order_detail.goods_count }}</li>
+									<li class="col04">11.80元</li>	
+								</ul>
+                                {% endfor %}
+							</td>
+							<td width="15%">{{ order_basic.total_price }}</td>
+							<td width="15%">{{ order_basic.order_status|order_status}}</td>
+							<td width="15%"><a href="#" class="oper_btn">{{ order_basic.order_status }}</a></td>
+						</tr>
+					</tbody>
+				</table>
+                {% endfor %}
+				<div class="pagenation">
+                    {% if order_basic_list.has_previous %}
+				    <a href="/user/order/{{ order_basic_list.number|add:-1 }}">&lt;上一页</a>
+                    {% endif %}
+                    {% for pindex in pages %}
+                        {% if pindex == order_basic_list.number  %}
+                            <a href="/user/order/{{ pindex }}/" class="active">{{ pindex }}</a>
+                        {% else %}
+                            <a href="/user/order/{{ pindex }}/">{{ pindex }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    {% if goods_li.has_next %}
+                        <a href="/user/order/{{ order_basic_list.number|add:1 }}">下一页&gt;</a>
+                    {% endif %}
+				</div>
+		</div>
+{% endblock right_content%}
